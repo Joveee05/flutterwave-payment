@@ -151,3 +151,55 @@ exports.getFee = async (req, res) => {
     console.log(error);
   }
 };
+
+exports.createOTP = async (req, res) => {
+  try {
+    const payload = {
+      length: 7,
+      customer: {
+        name: 'Kazan',
+        email: 'joveee05@gmail.com',
+        phone: '2348119858137',
+      },
+      sender: 'Wynk Limited',
+      send: true,
+      medium: ['email', 'sms'],
+      expiry: 5,
+    };
+
+    const response = await flw.Otp.create(payload);
+    res.status(200).json({
+      response,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.validateOTP = async (req, res) => {
+  try {
+    const payload = {
+      reference: req.params.reference,
+      otp: '0986517',
+    };
+
+    const response = await flw.Otp.validate(payload);
+    res.status(200).json({
+      response,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.verifyTransactions = async (req, res) => {
+  try {
+    const payload = { id: req.params.id }; //This is the transaction unique identifier. It is returned in the initiate transaction call as data.id
+    const response = await flw.Transaction.verify(payload);
+    res.status(200).json({
+      response,
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};

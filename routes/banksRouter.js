@@ -19,4 +19,10 @@ router.post('/send_to_account', banksController.initTrans);
 
 router.post('/transfer_fee', banksController.getFee);
 
+router.post('/create_otp', banksController.createOTP);
+
+router.post('/validate_otp/:reference', banksController.validateOTP);
+
+router.get('/verify_transactions/:id', banksController.verifyTransactions);
+
 module.exports = router;
