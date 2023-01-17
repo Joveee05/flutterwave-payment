@@ -1,4 +1,5 @@
 const Flutterwave = require('flutterwave-node-v3');
+const Transaction = require('../models/transactionModel');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: './config.env' });
@@ -7,6 +8,21 @@ const flw = new Flutterwave(
   process.env.FLW_PUBLIC_KEY,
   process.env.FLW_SECRET_KEY,
 );
+
+// async function insertData(
+//   transactionType,
+//   status,
+//   fee,
+//   flw_id
+// ) {
+//   const add = { transactionType, status, fee, flw_id };
+//   const result = await knex('transactions').insert(add);
+//   if (result) {
+//     return true;
+//   } else {
+//     return false;
+//   }
+// }
 
 exports.getBanks = async (req, res) => {
   try {
@@ -81,8 +97,8 @@ exports.charge_ng_acct = async (req, res) => {
 exports.verifyAcct = async (req, res) => {
   try {
     const payload = {
-      account_number: '0690000040',
-      account_bank: '044',
+      account_number: req.body.account_number,
+      account_bank: req.body.account_bank,
     };
     const response = await flw.Misc.verify_Account(payload);
     res.status(200).json({
@@ -114,20 +130,24 @@ exports.ussd = async (req, res) => {
   }
 };
 
-exports.initTrans = async (req, res) => {
+exports.initTrans = async (req, res, next) => {
   try {
     const payload = {
-      account_bank: '032', //This is the recipient bank code. Get list here :https://developer.flutterwave.com/v3.0/reference#get-all-banks
-      account_number: '0066338814',
-      amount: 1000,
-      narration: 'test',
-      currency: 'NGN',
+      account_bank: req.body.account_bank, //This is the recipient bank code. Get list here :https://developer.flutterwave.com/v3.0/reference#get-all-banks
+      account_number: req.body.account_number,
+      amount: req.body.amount,
+      narration: req.body.narration,
+      currency: req.body.currency,
       reference: 'wynk-' + Math.floor(Math.random() * 100000000 + 1), //This is a merchant's unique reference for the transfer, it can be used to query for the status of the transfer
       callback_url: 'https://webhook.site/b3e505b0-fe02-430e-a538-22bbbce8ce0d',
       debit_currency: 'NGN',
     };
-
     const response = await flw.Transfer.initiate(payload);
+    if (response.status === 'success') {
+      const newData = await Transaction.create(payload);
+    } else {
+      return next('Transaction Failed');
+    }
     res.status(200).json({
       response,
     });
@@ -139,7 +159,7 @@ exports.initTrans = async (req, res) => {
 exports.getFee = async (req, res) => {
   try {
     const payload = {
-      amount: '5000',
+      amount: req.body.amount,
       currency: 'NGN',
     };
 
