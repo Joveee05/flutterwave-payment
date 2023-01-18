@@ -2,10 +2,7 @@ const { Sequelize } = require('sequelize');
 const sequelize = require('sequelize');
 const DB = require('../database');
 
-const Transactions = DB.define('transactions', {
-  trans_id: {
-    type: sequelize.DataTypes.INTEGER,
-  },
+const Transaction = DB.define('transactions', {
   amount: {
     type: sequelize.DataTypes.DECIMAL(10, 2),
   },
@@ -20,6 +17,9 @@ const Transactions = DB.define('transactions', {
     type: sequelize.DataTypes.BIGINT(10),
   },
   narration: {
+    type: sequelize.DataTypes.STRING,
+  },
+  fullname: {
     type: sequelize.DataTypes.STRING,
   },
   tx_ref: {
@@ -68,12 +68,6 @@ const Transactions = DB.define('transactions', {
   bank_code: {
     type: sequelize.DataTypes.INTEGER,
   },
-  credit: {
-    type: sequelize.DataTypes.STRING,
-  },
-  debit: {
-    type: sequelize.DataTypes.STRING,
-  },
 });
 
-module.exports = Transactions;
+module.exports = Transaction;
