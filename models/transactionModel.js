@@ -3,6 +3,9 @@ const sequelize = require('sequelize');
 const DB = require('../database');
 
 const Transactions = DB.define('transactions', {
+  trans_id: {
+    type: sequelize.DataTypes.INTEGER,
+  },
   amount: {
     type: sequelize.DataTypes.DECIMAL(10, 2),
   },
@@ -39,11 +42,31 @@ const Transactions = DB.define('transactions', {
     type: sequelize.DataTypes.STRING,
     defaultValue: 'NGN',
   },
-  customerID: {
-    type: sequelize.DataTypes.STRING,
+  customer: [
+    {
+      type: sequelize.DataTypes.STRING,
+    },
+  ],
+  account: [
+    {
+      type: sequelize.DataTypes.STRING,
+    },
+  ],
+  id: {
+    type: sequelize.DataTypes.INTEGER,
+    primaryKey: true,
+  },
+  fee: {
+    type: sequelize.DataTypes.DECIMAL(10, 2),
   },
   status: {
     type: sequelize.DataTypes.STRING,
+  },
+  bank_name: {
+    type: sequelize.DataTypes.STRING,
+  },
+  bank_code: {
+    type: sequelize.DataTypes.INTEGER,
   },
   credit: {
     type: sequelize.DataTypes.STRING,

@@ -1,4 +1,6 @@
 const Flutterwave = require('flutterwave-node-v3');
+const Transaction = require('../models/transactionModel');
+const AppError = require('../utils/appError');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: './config.env' });
@@ -11,15 +13,20 @@ const flw = new Flutterwave(
 exports.createBill = async (req, res, next) => {
   try {
     const payload = {
-      country: 'NG',
-      customer: '+2348025151564',
-      amount: 100,
+      country: process.env.COUNTRY,
+      customer: req.body.customerID,
+      amount: req.body.amount,
       recurrence: 'ONCE',
-      type: 'AIRTIME',
+      type: req.body.bill_type,
       reference: 'wynk-' + Math.floor(Math.random() * 100000000 + 1),
     };
 
     const response = await flw.Bills.create_bill(payload);
+    if (response.status === 'success') {
+      const newData = await Transaction.create(response.data);
+    } else {
+      return next(new AppError('Transaction Failed', 400));
+    }
     res.status(200).json({
       response,
     });
@@ -39,23 +46,37 @@ exports.getBillsCategories = async (req, res, next) => {
     let cableTV = [];
     const response = await flw.Bills.fetch_bills_Cat();
     for (const bill of response.data) {
-      if (bill.biller_name.includes('MB' && 'GB') && bill.country == 'NG') {
-        dataBundle.push(bill.biller_name);
+      if (bill.biller_name.includes('MB') && bill.country == 'NG') {
+        dataBundle.push({ name: bill.biller_name, amount: bill.amount });
+      }
+      if (bill.biller_name.includes('GB') && bill.country == 'NG') {
+        dataBundle.push({ name: bill.biller_name, amount: bill.amount });
       }
       if (bill.biller_name.includes('VTU') && bill.country == 'NG') {
         airtime.push(bill.biller_name);
       }
       if (bill.biller_name.includes('DSTV') && bill.country == 'NG') {
-        cableTV.push(bill.biller_name);
+        cableTV.push({
+          name: bill.biller_name,
+          amount: bill.amount,
+          item_code: bill.item_code,
+          biller_code: bill.biller_code,
+        });
       }
 
       if (bill.biller_name.includes('GOTV') && bill.country == 'NG') {
-        cableTV.push(bill.biller_name);
+        cableTV.push({
+          name: bill.biller_name,
+          amount: bill.amount,
+          item_code: bill.item_code,
+          biller_code: bill.biller_code,
+        });
       }
     }
 
     res.status(200).json({
-      bills: [dataBundle, airtime, cableTV],
+      bills: { dataBundle, airtime, cableTV },
+      // response,
     });
   } catch (error) {
     res.status(400).json({
@@ -84,9 +105,9 @@ exports.getStatus = async (req, res) => {
 exports.validateBill = async (req, res, next) => {
   try {
     const payload = {
-      item_code: 'AT099',
-      code: 'BIL099',
-      customer: '08025151564',
+      item_code: req.body.item_code,
+      code: req.body.biller_code,
+      customer: req.body.customer, //This is either phone number, DSTV or GOTV IUC number, electric meter No.
     };
 
     const response = await flw.Bills.validate(payload);

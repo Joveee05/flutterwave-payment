@@ -1,5 +1,6 @@
 const Flutterwave = require('flutterwave-node-v3');
 const Transaction = require('../models/transactionModel');
+const AppError = require('../utils/appError');
 const dotenv = require('dotenv');
 
 dotenv.config({ path: './config.env' });
@@ -9,25 +10,10 @@ const flw = new Flutterwave(
   process.env.FLW_SECRET_KEY,
 );
 
-// async function insertData(
-//   transactionType,
-//   status,
-//   fee,
-//   flw_id
-// ) {
-//   const add = { transactionType, status, fee, flw_id };
-//   const result = await knex('transactions').insert(add);
-//   if (result) {
-//     return true;
-//   } else {
-//     return false;
-//   }
-// }
-
 exports.getBanks = async (req, res) => {
   try {
     const payload = {
-      country: req.body.country, //Pass either NG, GH, KE, UG, ZA or TZ to get list of banks in Nigeria, Ghana, Kenya, Uganda, South Africa or Tanzania respectively
+      country: req.query.country, //Pass either NG, GH, KE, UG, ZA or TZ to get list of banks in Nigeria, Ghana, Kenya, Uganda, South Africa or Tanzania respectively
     };
     const response = await flw.Bank.country(payload);
     res.status(200).json({
@@ -52,40 +38,45 @@ exports.getBranches = async (req, res) => {
   }
 };
 
-exports.bank_trf = async (req, res) => {
+// exports.bank_trf = async (req, res) => {
+//   try {
+//     const payload = {
+//       tx_ref: 'wynk-' + Math.floor(Math.random() * 100000000 + 1),
+//       amount: '15000',
+//       currency: 'NGN',
+//       email: 'joveee05@gmail.com',
+//       phone_number: '08119858137',
+//       narration: 'Wynk Salary for May',
+//     };
+
+//     const response = await flw.Charge.bank_transfer(payload);
+//     res.status(200).json({
+//       response,
+//     });
+//   } catch (error) {
+//     console.log(error);
+//   }
+// };
+
+exports.charge_ng_acct = async (req, res, next) => {
   try {
     const payload = {
       tx_ref: 'wynk-' + Math.floor(Math.random() * 100000000 + 1),
-      amount: '15000',
+      amount: req.body.amount,
+      account_bank: req.body.account_bank,
+      account_number: req.body.account_number,
       currency: 'NGN',
-      email: 'joveee05@gmail.com',
-      phone_number: '08119858137',
-      narration: 'Wynk Salary for May',
-    };
-
-    const response = await flw.Charge.bank_transfer(payload);
-    res.status(200).json({
-      response,
-    });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-exports.charge_ng_acct = async (req, res) => {
-  try {
-    const payload = {
-      tx_ref: 'wynk-' + Math.floor(Math.random() * 100000000 + 1),
-      amount: '10000',
-      account_bank: '044',
-      account_number: '0690000037',
-      currency: 'NGN',
-      email: 'joveee05@gmail.com',
-      phone_number: '09000000000',
-      fullname: 'Flutterwave Developers',
+      email: req.body.email,
+      phone_number: req.body.phoneNumber,
+      fullname: req.body.fullName,
     };
 
     const response = await flw.Charge.ng(payload);
+    if (response.status === 'success') {
+      const newData = await Transaction.create(response.data);
+    } else {
+      return next(new AppError('Transaction Failed', 400));
+    }
     res.status(200).json({
       response,
     });
@@ -113,15 +104,20 @@ exports.ussd = async (req, res) => {
   try {
     const payload = {
       tx_ref: 'wynk-' + Math.floor(Math.random() * 100000000 + 1),
-      account_bank: '058',
-      amount: '1500',
-      currency: 'NGN',
-      email: 'user@flw.com',
-      phone_number: '07033923458',
-      fullname: 'Yemi Desola',
+      account_bank: req.body.account_bank,
+      amount: req.body.amount,
+      currency: process.env.CURRENCY,
+      email: req.body.email,
+      phone_number: req.body.phone_number,
+      fullname: req.body.fullname,
     };
 
     const response = await flw.Charge.ussd(payload);
+    if (response.status === 'success') {
+      const newData = await Transaction.create(response.data);
+    } else {
+      return next(new AppError('Transaction Failed', 400));
+    }
     res.status(200).json({
       response,
     });
@@ -139,14 +135,14 @@ exports.initTrans = async (req, res, next) => {
       narration: req.body.narration,
       currency: req.body.currency,
       reference: 'wynk-' + Math.floor(Math.random() * 100000000 + 1), //This is a merchant's unique reference for the transfer, it can be used to query for the status of the transfer
-      callback_url: 'https://webhook.site/b3e505b0-fe02-430e-a538-22bbbce8ce0d',
-      debit_currency: 'NGN',
+      callback_url: process.env.callback_url,
+      debit_currency: process.env.CURRENCY,
     };
     const response = await flw.Transfer.initiate(payload);
     if (response.status === 'success') {
-      const newData = await Transaction.create(payload);
+      const newData = await Transaction.create(response.data);
     } else {
-      return next('Transaction Failed');
+      return next(new AppError('Transaction Failed', 400));
     }
     res.status(200).json({
       response,
@@ -160,7 +156,7 @@ exports.getFee = async (req, res) => {
   try {
     const payload = {
       amount: req.body.amount,
-      currency: 'NGN',
+      currency: process.env.CURRENCY,
     };
 
     const response = await flw.Transfer.fee(payload);
@@ -175,16 +171,16 @@ exports.getFee = async (req, res) => {
 exports.createOTP = async (req, res) => {
   try {
     const payload = {
-      length: 7,
+      length: process.env.LENGTH,
       customer: {
-        name: 'Kazan',
-        email: 'joveee05@gmail.com',
-        phone: '2348119858137',
+        name: req.body.name,
+        email: req.body.email,
+        phone: req.body.phone,
       },
-      sender: 'Wynk Limited',
+      sender: process.env.SENDER,
       send: true,
       medium: ['email', 'sms'],
-      expiry: 5,
+      expiry: process.env.EXPIRY,
     };
 
     const response = await flw.Otp.create(payload);
@@ -200,7 +196,7 @@ exports.validateOTP = async (req, res) => {
   try {
     const payload = {
       reference: req.params.reference,
-      otp: '0986517',
+      otp: req.body.otp,
     };
 
     const response = await flw.Otp.validate(payload);
