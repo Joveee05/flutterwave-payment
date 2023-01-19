@@ -175,7 +175,7 @@ exports.createOTP = async (req, res) => {
       customer: {
         name: req.body.name,
         email: req.body.email,
-        phone: req.body.phone,
+        phone: req.body.phoneNumber,
       },
       sender: process.env.SENDER,
       send: true,

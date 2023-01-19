@@ -130,8 +130,8 @@ router.get('/verify_transactions/:id', banksController.verifyTransactions);
 /**
  * @swagger
  * tags:
- *    name: FlutterWave
- *    description: The Wynk Flutterwave Transactions Managing API
+ *    name: Banks
+ *    description: The Wynk Flutterwave Bank Transactions Managing API
  */
 
 /**
@@ -139,7 +139,7 @@ router.get('/verify_transactions/:id', banksController.verifyTransactions);
  * /banks/all-banks:
  *    get:
  *      summary: Get All Banks in Nigeria. Pass in country code 'NG' in query field.
- *      tags: [FlutterWave]
+ *      tags: [Banks]
  *      parameters:
  *      - in: query
  *        name: country
@@ -167,7 +167,7 @@ router.get('/verify_transactions/:id', banksController.verifyTransactions);
  * /banks/charge_ng_account:
  *    post:
  *      summary: Charge a customer's NUBAN
- *      tags: [FlutterWave]
+ *      tags: [Banks]
  *      requestBody:
  *        required: true
  *        content:
@@ -182,7 +182,7 @@ router.get('/verify_transactions/:id', banksController.verifyTransactions);
  *                  phoneNumber: '09012345678'
  *                  fullName: Yemi Danjuma
  *      responses:
- *          201:
+ *          200:
  *            description: Charge successful
  *            content:
  *                application/json:
@@ -203,6 +203,264 @@ router.get('/verify_transactions/:id', banksController.verifyTransactions);
  *
  *          500:
  *            description: Internal server error. Try again
+ */
+
+/**
+ * @swagger
+ * /banks/bank_holder_details:
+ *    get:
+ *      summary: Get or verify the details of a NUBAN.
+ *      tags: [Banks]
+ *      requestBody:
+ *         required: true
+ *         content:
+ *          application/json:
+ *              schema:
+ *                 $ref: '#/components/schemas/Transaction'
+ *              example:
+ *                  account_bank: '044'
+ *                  account_number: '0690000037'
+ *      responses:
+ *        200:
+ *          description: Account details fetched
+ *          content:
+ *             application/json:
+ *                 schema:
+ *                 type: String
+ *                 example:
+ *                     account_number: '0690000037'
+ *                     account_name: Ibra Mili
+ *        500:
+ *          description: Internal Server error
+ */
+
+/**
+ * @swagger
+ * /banks/ussd:
+ *    post:
+ *      summary: Charge a customer via USSD
+ *      tags: [Banks]
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *              schema:
+ *                 $ref: '#/components/schemas/Transaction'
+ *              example:
+ *                  amount: 1000
+ *                  account_bank: '044'
+ *                  account_number: '0690000037'
+ *                  email: max@example.com
+ *                  phone_number: '09012345678'
+ *                  fullname: Yemi Danjuma
+ *      responses:
+ *          200:
+ *            description: Charge initiated
+ *            content:
+ *                application/json:
+ *                    schema:
+ *                       $ref: '#/components/schemas/Transaction'
+ *                    example:
+ *                        id: 4099423
+ *                        tx_ref: wynk-11806651
+ *                        amount: 10000
+ *                        currency: NGN
+ *                        narration: Wynk Limited
+ *                        status: pending
+ *                        customer: Yemi Danjuma
+ *                        account: '0690000037'
+ *                        meta: Please dial *889*767*5745#
+ *          400:
+ *            description: Transaction Failed
+ *
+ *          500:
+ *            description: Internal server error. Try again
+ */
+
+/**
+ * @swagger
+ * /banks/send_to_account:
+ *    post:
+ *      summary: Send money to NUBAN
+ *      tags: [Banks]
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *              schema:
+ *                 $ref: '#/components/schemas/Transaction'
+ *              example:
+ *                  amount: 1000
+ *                  account_bank: '044'
+ *                  account_number: '0690000037'
+ *                  narration: Payment for June
+ *                  currency: NGN
+ *      responses:
+ *          200:
+ *            description: Transfer Queued Successfully
+ *            content:
+ *                application/json:
+ *                    schema:
+ *                       $ref: '#/components/schemas/Transaction'
+ *                    example:
+ *                        id: 4099423
+ *                        fee: 10.75
+ *                        amount: 10000
+ *                        currency: NGN
+ *                        narration: Wynk Limited
+ *                        status: NEW
+ *                        reference: wynk-2172891
+ *                        full_name: Bale Gary
+ *                        account_number: '0690000037'
+ *                        bank_name: ACCESS BANK NIGERIA
+ *          400:
+ *            description: Transaction Failed
+ *
+ *          500:
+ *            description: Internal server error. Try again
+ */
+
+/**
+ * @swagger
+ * /banks/transfer_fee:
+ *    post:
+ *      summary: Get a transfer fee
+ *      tags: [Banks]
+ *      requestBody:
+ *         required: true
+ *         content:
+ *          application/json:
+ *              schema:
+ *                 $ref: '#/components/schemas/Transaction'
+ *              example:
+ *                  amount: 1000
+ *      responses:
+ *        200:
+ *          description: Transfer fee fetched
+ *          content:
+ *             application/json:
+ *                 schema:
+ *                 type: String
+ *                 example:
+ *                     currency: NGN
+ *                     fee_type: value
+ *                     fee: 10.75
+ *        500:
+ *          description: Internal Server error
+ */
+
+/**
+ * @swagger
+ * /banks/create_otp:
+ *    post:
+ *      summary: Create FlutterWave Generated OTP
+ *      tags: [Banks]
+ *      requestBody:
+ *        required: true
+ *        content:
+ *          application/json:
+ *              schema:
+ *                 $ref: '#/components/schemas/Transaction'
+ *              example:
+ *                  name: Kazan Hussein
+ *                  email: kazan@example.com
+ *                  phoneNumber: '08025678903'
+ *      responses:
+ *          200:
+ *            description: OTP generated successfully
+ *            content:
+ *                application/json:
+ *                    schema:
+ *                       $ref: '#/components/schemas/Transaction'
+ *                    examples:
+ *                       Email:
+ *                         value:
+ *                            medium: email
+ *                            reference: CF-BARTER-20230119040729944303
+ *                            otp: "6858911"
+ *                            expiry: "2023-01-19T16:17:29.7531938+00:00"
+ *                       sms:
+ *                         value:
+ *                            medium: sms
+ *                            reference: CF-BARTER-20230119040730946084
+ *                            otp: "6858911"
+ *                            expiry: "2023-01-19T16:17:29.7531938+00:00"
+ *
+ *
+ *          500:
+ *            description: Internal server error. Try again
+ */
+
+/**
+ * @swagger
+ * /banks/validate_otp/{reference}:
+ *    post:
+ *      summary: Validate OTP sent to customer via email, sms or both.
+ *      tags: [Banks]
+ *      parameters:
+ *      - in: path
+ *        name: reference
+ *        schema:
+ *        type: string
+ *        required: true
+ *        description: Unique reference generated by Flutterwave after creating OTP
+ *      requestBody:
+ *         required: true
+ *         content:
+ *            application/json:
+ *                schema:
+ *                  $ref: '#/components/schemas/Transaction'
+ *                example:
+ *                  otp: '6450685'
+ *      responses:
+ *        200:
+ *          description: Otp Authenticated successfully
+ *          content:
+ *             application/json:
+ *                 schema:
+ *                 type: String
+ *                 example:
+ *                     status: success
+ *                     message: Otp Authenticated successfully
+ *                     data: null
+ *        500:
+ *          description: Internal Server error
+ */
+
+/**
+ * @swagger
+ * /banks/verify_transactions/{id}:
+ *      get:
+ *        summary: Get the status of a transaction
+ *        tags: [Banks]
+ *        parameters:
+ *          - in: path
+ *            name: id
+ *            schema:
+ *              type: string
+ *            required: true
+ *            description: This is the unique Flutterwave id generated when a transaction is initiated.
+ *        responses:
+ *          200:
+ *            description: Transaction fetched successfully
+ *            content:
+ *                application/json:
+ *                  schema:
+ *                      $ref: '#/components/schemas/Transaction'
+ *                  example:
+ *                        id: 4099423
+ *                        fee: 10.75
+ *                        amount: 10000
+ *                        currency: NGN
+ *                        narration: Wynk Limited
+ *                        status: NEW
+ *                        reference: wynk-2172891
+ *                        full_name: Bale Gary
+ *                        account_number: '0690000037'
+ *                        bank_name: ACCESS BANK NIGERIA
+ *          404:
+ *            description: No transaction found with that id
+ *
  */
 
 module.exports = router;

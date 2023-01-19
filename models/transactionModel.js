@@ -47,6 +47,11 @@ const Transaction = DB.define('transactions', {
       type: sequelize.DataTypes.STRING,
     },
   ],
+  card: [
+    {
+      type: sequelize.DataTypes.STRING,
+    },
+  ],
   account: [
     {
       type: sequelize.DataTypes.STRING,

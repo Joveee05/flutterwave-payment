@@ -25,7 +25,12 @@ exports.createBill = async (req, res, next) => {
     if (response.status === 'success') {
       const newData = await Transaction.create(response.data);
     } else {
-      return next(new AppError('Transaction Failed', 400));
+      return next(
+        new AppError(
+          'Transaction Failed. Insufficient funds in your wallet',
+          400,
+        ),
+      );
     }
     res.status(200).json({
       response,
@@ -79,10 +84,6 @@ exports.getBillsCategories = async (req, res, next) => {
       // response,
     });
   } catch (error) {
-    res.status(400).json({
-      status: 'Failed',
-      error,
-    });
     console.log(error);
   }
 };
@@ -107,7 +108,7 @@ exports.validateBill = async (req, res, next) => {
     const payload = {
       item_code: req.body.item_code,
       code: req.body.biller_code,
-      customer: req.body.customer, //This is either phone number, DSTV or GOTV IUC number, electric meter No.
+      customer: req.body.customerID, //This is either phone number, DSTV or GOTV IUC number, electric meter No.
     };
 
     const response = await flw.Bills.validate(payload);
