@@ -49,30 +49,81 @@ exports.getBillsCategories = async (req, res, next) => {
     let dataBundle = [];
     let airtime = [];
     let cableTV = [];
+    let power = [];
     const response = await flw.Bills.fetch_bills_Cat();
     for (const bill of response.data) {
-      if (bill.biller_name.includes('MB') && bill.country == 'NG') {
-        dataBundle.push({ name: bill.biller_name, amount: bill.amount });
+      if (bill.biller_name.includes('MB') && bill.country === 'NG') {
+        dataBundle.push({
+          name: bill.biller_name,
+          amount: bill.amount,
+          fee: bill.fee,
+          item_code: bill.item_code,
+          biller_code: bill.biller_code,
+        });
       }
-      if (bill.biller_name.includes('GB') && bill.country == 'NG') {
-        dataBundle.push({ name: bill.biller_name, amount: bill.amount });
+      if (bill.biller_name.includes('GB') && bill.country === 'NG') {
+        dataBundle.push({
+          name: bill.biller_name,
+          fee: bill.fee,
+          amount: bill.amount,
+          item_code: bill.item_code,
+          biller_code: bill.biller_code,
+        });
       }
-      if (bill.biller_name.includes('VTU') && bill.country == 'NG') {
-        airtime.push(bill.biller_name);
+      if (bill.biller_name.includes('VTU') && bill.country === 'NG') {
+        airtime.push({
+          name: bill.biller_name,
+          fee: bill.fee,
+          amount: bill.amount,
+          item_code: bill.item_code,
+          biller_code: bill.biller_code,
+        });
       }
-      if (bill.biller_name.includes('DSTV') && bill.country == 'NG') {
+      if (bill.biller_name.includes('DSTV') && bill.country === 'NG') {
         cableTV.push({
           name: bill.biller_name,
+          fee: bill.fee,
           amount: bill.amount,
           item_code: bill.item_code,
           biller_code: bill.biller_code,
         });
       }
 
-      if (bill.biller_name.includes('GOTV') && bill.country == 'NG') {
+      if (bill.biller_name.includes('GOTV') && bill.country === 'NG') {
         cableTV.push({
           name: bill.biller_name,
+          fee: bill.fee,
           amount: bill.amount,
+          item_code: bill.item_code,
+          biller_code: bill.biller_code,
+        });
+      }
+      if (bill.name.includes('STARTIMES') && bill.country === 'NG') {
+        cableTV.push({
+          name: bill.name,
+          biller_name: bill.biller_name,
+          amount: bill.amount,
+          fee: bill.fee,
+          item_code: bill.item_code,
+          biller_code: bill.biller_code,
+        });
+      }
+
+      if (bill.biller_name.includes('DISCO') && bill.country === 'NG') {
+        power.push({
+          name: bill.biller_name,
+          amount: bill.amount,
+          fee: bill.fee,
+          item_code: bill.item_code,
+          biller_code: bill.biller_code,
+        });
+      }
+
+      if (bill.biller_name.includes('EDC') && bill.country === 'NG') {
+        power.push({
+          name: bill.biller_name,
+          amount: bill.amount,
+          fee: bill.fee,
           item_code: bill.item_code,
           biller_code: bill.biller_code,
         });
@@ -80,7 +131,7 @@ exports.getBillsCategories = async (req, res, next) => {
     }
 
     res.status(200).json({
-      bills: { dataBundle, airtime, cableTV },
+      bills: { dataBundle, airtime, cableTV, power },
       // response,
     });
   } catch (error) {

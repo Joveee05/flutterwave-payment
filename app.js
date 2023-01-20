@@ -56,7 +56,7 @@ const specs = swaggerJsDoc(options);
 app.get('/', (req, res) => {
   res.json({
     message: 'Welcome to the Wynk FlutterWave API',
-    Author: 'Brian Etaghene',
+    Author: 'Brian Etaghene<brian@wynk.ng>',
   });
 });
 
