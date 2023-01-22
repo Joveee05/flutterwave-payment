@@ -135,7 +135,7 @@ exports.initTrans = async (req, res, next) => {
       narration: req.body.narration,
       currency: req.body.currency,
       reference: 'wynk-' + Math.floor(Math.random() * 100000000 + 1), //This is a merchant's unique reference for the transfer, it can be used to query for the status of the transfer
-      callback_url: process.env.callback_url,
+      // callback_url: process.env.callback_url,
       debit_currency: process.env.CURRENCY,
     };
     const response = await flw.Transfer.initiate(payload);
