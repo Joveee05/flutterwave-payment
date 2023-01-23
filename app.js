@@ -1,7 +1,9 @@
 const express = require('express');
 const dotenv = require('dotenv');
+const morgan = require('morgan');
 const sequelize = require('sequelize');
 const path = require('path');
+const bodyParser = require('body-parser');
 const DB = require('./database');
 const billsRouter = require('./routes/billsRouter');
 const banksRouter = require('./routes/banksRouter');
@@ -19,6 +21,8 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
+
+app.use(bodyParser.json());
 
 const options = {
   definition: {
