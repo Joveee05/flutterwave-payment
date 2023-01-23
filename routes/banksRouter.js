@@ -13,7 +13,7 @@ router.post('/charge_ng_account', banksController.charge_ng_acct);
 
 router.post('/bank_holder_details', banksController.verifyAcct);
 
-router.post('/ussd', banksController.ussd);
+router.post('/charge_ussd', banksController.ussd);
 
 router.post('/send_to_account', banksController.initTrans);
 
@@ -208,7 +208,7 @@ router.get('/verify_transactions/:id', banksController.verifyTransactions);
 /**
  * @swagger
  * /banks/bank_holder_details:
- *    get:
+ *    post:
  *      summary: Get or verify the details of a NUBAN.
  *      tags: [Banks]
  *      requestBody:
@@ -236,7 +236,7 @@ router.get('/verify_transactions/:id', banksController.verifyTransactions);
 
 /**
  * @swagger
- * /banks/ussd:
+ * /banks/charge_ussd:
  *    post:
  *      summary: Charge a customer via USSD
  *      tags: [Banks]
