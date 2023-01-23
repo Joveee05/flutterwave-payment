@@ -69,13 +69,12 @@ exports.charge_ng_acct = async (req, res, next) => {
       email: req.body.email,
       phone_number: req.body.phoneNumber,
       fullname: req.body.fullName,
+      passcode: req.body.DOB,
     };
 
     const response = await flw.Charge.ng(payload);
     if (response.status === 'success') {
       const newData = await Transaction.create(response.data);
-    } else {
-      return next(new AppError('Transaction Failed', 400));
     }
     res.status(200).json({
       response,
@@ -115,8 +114,6 @@ exports.ussd = async (req, res) => {
     const response = await flw.Charge.ussd(payload);
     if (response.status === 'success') {
       const newData = await Transaction.create(response.data);
-    } else {
-      return next(new AppError('Transaction Failed', 400));
     }
     res.status(200).json({
       response,
@@ -134,15 +131,13 @@ exports.initTrans = async (req, res, next) => {
       amount: req.body.amount,
       narration: req.body.narration,
       currency: req.body.currency,
-      reference: 'wynk-' + Math.floor(Math.random() * 100000000 + 1), //This is a merchant's unique reference for the transfer, it can be used to query for the status of the transfer
+      reference: 'wynk-' + Math.floor(Math.random() * 100000000 + 1),
       // callback_url: process.env.callback_url,
       debit_currency: process.env.CURRENCY,
     };
     const response = await flw.Transfer.initiate(payload);
     if (response.status === 'success') {
       const newData = await Transaction.create(response.data);
-    } else {
-      return next(new AppError('Transaction Failed', 400));
     }
     res.status(200).json({
       response,
