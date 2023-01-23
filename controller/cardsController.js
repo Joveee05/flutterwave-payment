@@ -28,7 +28,7 @@ exports.chargeCard = async (req, res, next) => {
   };
   try {
     const response = await flw.Charge.card(payload);
-    // console.log(response);
+    console.log(response);
 
     // Authorizing transactions
 
