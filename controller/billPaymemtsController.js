@@ -24,13 +24,6 @@ exports.createBill = async (req, res, next) => {
     const response = await flw.Bills.create_bill(payload);
     if (response.status === 'success') {
       const newData = await Transaction.create(response.data);
-    } else {
-      return next(
-        new AppError(
-          'Transaction Failed. Insufficient funds in your wallet',
-          400,
-        ),
-      );
     }
     res.status(200).json({
       response,
