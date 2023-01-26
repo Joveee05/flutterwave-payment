@@ -10,6 +10,7 @@ const banksRouter = require('./routes/banksRouter');
 const cardsRouter = require('./routes/cardsRouter');
 const swaggerUI = require('swagger-ui-express');
 const swaggerJsDoc = require('swagger-jsdoc');
+const AppError = require('./utils/appError');
 
 dotenv.config({ path: './config.env' });
 

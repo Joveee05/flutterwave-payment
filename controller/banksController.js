@@ -132,7 +132,7 @@ exports.initTrans = async (req, res, next) => {
       narration: req.body.narration,
       currency: req.body.currency,
       reference: 'wynk-' + Math.floor(Math.random() * 100000000 + 1),
-      // callback_url: process.env.callback_url,
+      callback_url: process.env.callback_url,
       debit_currency: process.env.CURRENCY,
     };
     const response = await flw.Transfer.initiate(payload);
@@ -210,6 +210,34 @@ exports.verifyTransactions = async (req, res) => {
     res.status(200).json({
       response,
     });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.verifyWebhook = async (req, res) => {
+  try {
+    // If you specified a secret hash, check for the signature
+    const secretHash = process.env.FLW_SECRET_HASH;
+    const signature = req.headers['verify-hash'];
+    if (!signature || signature !== secretHash) {
+      // This request isn't from Flutterwave; discard
+      res.status(401).json({
+        status: 'Failed',
+        message: 'Verification Failed',
+      });
+    } else {
+      const payload = req.body;
+      // It's a good idea to log all received events.
+      if (response.status === 'success') {
+        await Transaction.create(response.data);
+      }
+      // Do something (that doesn't take too long) with the payload
+      res.status(200).json({
+        status: 'Success',
+        message: 'Verification Successful',
+      });
+    }
   } catch (error) {
     console.log(error);
   }

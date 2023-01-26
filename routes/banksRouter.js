@@ -19,6 +19,8 @@ router.post('/send_to_account', banksController.initTrans);
 
 router.post('/transfer_fee', banksController.getFee);
 
+router.post('/flw-webhook', banksController.verifyWebhook);
+
 router.post('/create_otp', banksController.createOTP);
 
 router.post('/validate_otp/:reference', banksController.validateOTP);
